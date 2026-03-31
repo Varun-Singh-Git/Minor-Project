@@ -180,7 +180,9 @@ IF Correlation < 0.21 AND Red_Std > 0.44 → Slug Damage
 ---
 
 ## 👨‍💻 Author
-
+Varun Singh
+2CSE-9
+2410031683
 **IILM University, Greater Noida**  
 School of Computer Science and Engineering  
 Session 2025–26 | Minor Project
