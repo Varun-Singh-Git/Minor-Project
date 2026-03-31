@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crop Disease Detection System</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════════════════ -->
+<nav class="navbar navbar-dark px-4 py-3">
+  <div class="d-flex align-items-center gap-3">
+    <span class="nav-icon">🌿</span>
+    <div>
+      <span class="navbar-brand mb-0 fw-700">CropGuard AI</span>
+      <span class="navbar-sub d-block">Decision Tree Plant Disease Detector</span>
+    </div>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="badge-accuracy">97.33% Accuracy</span>
+    <span class="text-muted small">IILM University · 2025–26</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO SECTION
+═══════════════════════════════════════════════════ -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <h1 class="hero-title">Detect Plant Diseases <span class="text-accent">Instantly</span></h1>
+        <p class="hero-subtitle">
+          Upload a leaf image to receive an instant disease diagnosis powered by a
+          Decision Tree classifier trained on the DiaMOS Plant dataset.
+          Every prediction comes with <strong>explainable IF-THEN rules</strong>.
+        </p>
+        <div class="hero-stats d-flex gap-4 mt-4">
+          <div class="stat-item">
+            <span class="stat-number">5</span>
+            <span class="stat-label">Disease Classes</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">3,505</span>
+            <span class="stat-label">Training Images</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">10</span>
+            <span class="stat-label">GLCM Features</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="upload-card">
+
+          <!-- Upload Zone -->
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-zone-inner" id="uploadZoneInner">
+              <div class="upload-icon">
+                <i class="bi bi-cloud-arrow-up-fill"></i>
+              </div>
+              <p class="upload-title">Drop leaf image here</p>
+              <p class="upload-sub">or click to browse · JPG, PNG, JPEG</p>
+              <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,.bmp,.webp" hidden />
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div id="previewSection" class="d-none">
+            <img id="imagePreview" src="" alt="Selected leaf" class="preview-img" />
+            <button class="btn btn-clear" id="clearBtn">
+              <i class="bi bi-x-lg"></i> Clear
+            </button>
+          </div>
+
+          <!-- Analyse Button -->
+          <button class="btn btn-analyse w-100 mt-3" id="analyseBtn" disabled>
+            <i class="bi bi-search me-2"></i>
+            Analyse Leaf
+          </button>
+
+          <!-- Loading -->
+          <div id="loadingState" class="d-none text-center py-3">
+            <div class="spinner-leaf"></div>
+            <p class="mt-2 text-muted small">Extracting GLCM features & running classifier...</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     RESULTS SECTION
+═══════════════════════════════════════════════════ -->
+<section class="results-section d-none" id="resultsSection">
+  <div class="container">
+
+    <!-- Result Header -->
+    <div class="result-header text-center mb-5">
+      <h2 class="result-title">Analysis Complete</h2>
+      <p class="text-muted">Based on GLCM texture + colour feature extraction</p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- ── Left: Prediction Card ── -->
+      <div class="col-lg-4">
+        <div class="result-card prediction-card h-100">
+          <div class="card-label">Predicted Disease</div>
+          <div class="disease-badge" id="diseaseBadge">
+            <span id="diseaseIcon">🍃</span>
+            <span id="diseaseName">Leaf Spot</span>
+          </div>
+          <div class="confidence-meter mt-3">
+            <div class="confidence-label">
+              Confidence: <strong id="confidenceValue">--</strong>%
+            </div>
+            <div class="meter-track">
+              <div class="meter-fill" id="meterFill" style="width: 0%"></div>
+            </div>
+          </div>
+          <hr class="divider" />
+          <div class="advice-box" id="adviceBox">
+            <div class="advice-severity" id="severityBadge"></div>
+            <p class="advice-desc" id="adviceDesc"></p>
+            <p class="advice-action" id="adviceAction"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Middle: Probability Chart ── -->
+      <div class="col-lg-4">
+        <div class="result-card h-100">
+          <div class="card-label">Confidence per Class</div>
+          <div id="probChart" class="prob-chart mt-3"></div>
+        </div>
+      </div>
+
+      <!-- ── Right: Feature Values ── -->
+      <div class="col-lg-4">
+        <div class="result-card h-100">
+          <div class="card-label">Extracted Features (10-D Vector)</div>
+          <div id="featureTable" class="feature-table mt-3"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Decision Rules ── -->
+    <div class="row g-4 mt-1">
+      <div class="col-12">
+        <div class="result-card rules-card">
+          <div class="card-label">
+            <i class="bi bi-diagram-3 me-2"></i>
+            Decision Path (IF-THEN Rules)
+          </div>
+          <p class="text-muted small mt-1 mb-3">
+            This is the exact reasoning chain the Decision Tree followed to reach its prediction.
+            These are human-readable rules — no black box.
+          </p>
+          <div id="decisionRules" class="rules-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analyse Another -->
+    <div class="text-center mt-4">
+      <button class="btn btn-outline-success px-5" id="analyseAnotherBtn">
+        <i class="bi bi-arrow-repeat me-2"></i>Analyse Another Leaf
+      </button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     HOW IT WORKS SECTION
+═══════════════════════════════════════════════════ -->
+<section class="how-section">
+  <div class="container">
+    <h3 class="section-title text-center mb-5">How It Works</h3>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <h5>Image Pre-processing</h5>
+          <p>Resize to 128×128 → Normalize → Green-channel masking → Otsu segmentation</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <h5>Feature Extraction</h5>
+          <p>Compute 4 GLCM texture features (Contrast, Energy, Homogeneity, Correlation) + 6 RGB colour statistics</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <h5>Decision Tree Classification</h5>
+          <p>CART-trained tree with Gini criterion traverses IF-THEN rules to output disease class + confidence</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════ -->
+<footer class="footer text-center py-4">
+  <p class="mb-0 text-muted small">
+    CropGuard AI · Minor Project · IILM University, Greater Noida · 2025–26 ·
+    Decision Tree Classifier · DiaMOS Plant Dataset · 97.33% Accuracy
+  </p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ═══════════════════════════════════════════════════
+     APP JAVASCRIPT
+═══════════════════════════════════════════════════ -->
+<script>
+const uploadZone       = document.getElementById("uploadZone");
+const uploadZoneInner  = document.getElementById("uploadZoneInner");
+const imageInput       = document.getElementById("imageInput");
+const imagePreview     = document.getElementById("imagePreview");
+const previewSection   = document.getElementById("previewSection");
+const analyseBtn       = document.getElementById("analyseBtn");
+const clearBtn         = document.getElementById("clearBtn");
+const loadingState     = document.getElementById("loadingState");
+const resultsSection   = document.getElementById("resultsSection");
+
+let selectedFile = null;
+
+// ── Upload zone click ──
+uploadZone.addEventListener("click", () => imageInput.click());
+
+// ── Drag & drop ──
+uploadZone.addEventListener("dragover", e => {
+  e.preventDefault();
+  uploadZone.classList.add("drag-over");
+});
+uploadZone.addEventListener("dragleave", () => uploadZone.classList.remove("drag-over"));
+uploadZone.addEventListener("drop", e => {
+  e.preventDefault();
+  uploadZone.classList.remove("drag-over");
+  if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+});
+
+// ── File input change ──
+imageInput.addEventListener("change", () => {
+  if (imageInput.files.length > 0) handleFile(imageInput.files[0]);
+});
+
+function handleFile(file) {
+  if (!file.type.startsWith("image/")) {
+    alert("Please upload a valid image file.");
+    return;
+  }
+  selectedFile = file;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    imagePreview.src = e.target.result;
+    uploadZoneInner.classList.add("d-none");
+    previewSection.classList.remove("d-none");
+    analyseBtn.disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Clear ──
+clearBtn.addEventListener("click", () => {
+  selectedFile = null;
+  imageInput.value = "";
+  previewSection.classList.add("d-none");
+  uploadZoneInner.classList.remove("d-none");
+  analyseBtn.disabled = true;
+  resultsSection.classList.add("d-none");
+});
+
+// ── Analyse Another ──
+document.getElementById("analyseAnotherBtn").addEventListener("click", () => {
+  resultsSection.classList.add("d-none");
+  clearBtn.click();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+// ── Analyse ──
+analyseBtn.addEventListener("click", async () => {
+  if (!selectedFile) return;
+
+  analyseBtn.disabled = true;
+  loadingState.classList.remove("d-none");
+  resultsSection.classList.add("d-none");
+
+  const formData = new FormData();
+  formData.append("image", selectedFile);
+
+  try {
+    const response = await fetch("/predict", { method: "POST", body: formData });
+    const data = await response.json();
+
+    if (!data.success) {
+      alert("Prediction error: " + data.error);
+      return;
+    }
+
+    renderResults(data);
+    resultsSection.classList.remove("d-none");
+    resultsSection.scrollIntoView({ behavior: "smooth" });
+
+  } catch (err) {
+    alert("Network error: " + err.message);
+  } finally {
+    loadingState.classList.add("d-none");
+    analyseBtn.disabled = false;
+  }
+});
+
+// ──────────────────────────────────────────────
+// Render results
+// ──────────────────────────────────────────────
+const DISEASE_ICONS = {
+  "Healthy":       "🌿",
+  "Leaf_Spot":     "🍂",
+  "Leaf_Curl":     "🌀",
+  "Slug_Damage":   "🐌",
+  "Fruit_Disease": "🍐"
+};
+
+const SEVERITY_COLORS = {
+  "None":         "bg-success",
+  "Low-Moderate": "bg-warning text-dark",
+  "Moderate":     "bg-warning text-dark",
+  "High":         "bg-danger"
+};
+
+function renderResults(data) {
+  const cls = data.predicted_class;
+
+  // ── Prediction card ──
+  document.getElementById("diseaseIcon").textContent = DISEASE_ICONS[cls] || "🌱";
+  document.getElementById("diseaseName").textContent = cls.replace("_", " ");
+  document.getElementById("confidenceValue").textContent = data.confidence.toFixed(1);
+
+  const meterFill = document.getElementById("meterFill");
+  setTimeout(() => {
+    meterFill.style.width = data.confidence + "%";
+    meterFill.style.background = data.confidence >= 90
+      ? "#22c55e" : data.confidence >= 70 ? "#f59e0b" : "#ef4444";
+  }, 100);
+
+  // Advice
+  const advice = data.advice;
+  document.getElementById("adviceDesc").textContent   = advice.description;
+  document.getElementById("adviceAction").textContent = "💊 " + advice.action;
+  const sevBadge = document.getElementById("severityBadge");
+  sevBadge.textContent  = "Severity: " + advice.severity;
+  sevBadge.className    = "advice-severity badge " + (SEVERITY_COLORS[advice.severity] || "bg-secondary");
+
+  // ── Probability bars ──
+  const probChart = document.getElementById("probChart");
+  const sorted = Object.entries(data.all_probabilities)
+    .sort((a, b) => b[1] - a[1]);
+
+  probChart.innerHTML = sorted.map(([name, pct]) => `
+    <div class="prob-row mb-2">
+      <div class="d-flex justify-content-between mb-1">
+        <span class="prob-label">${DISEASE_ICONS[name] || "🌱"} ${name.replace("_"," ")}</span>
+        <span class="prob-pct ${pct === Math.max(...sorted.map(x=>x[1])) ? 'text-success fw-bold' : ''}">${pct.toFixed(1)}%</span>
+      </div>
+      <div class="prob-track">
+        <div class="prob-fill ${name === cls ? 'prob-fill-active' : ''}"
+             style="width:${Math.min(pct,100)}%; transition: width 0.8s ease;"></div>
+      </div>
+    </div>
+  `).join("");
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll(".prob-fill").forEach(el => {
+      const w = el.style.width;
+      el.style.width = "0%";
+      setTimeout(() => el.style.width = w, 50);
+    });
+  }, 100);
+
+  // ── Feature table ──
+  const featureTable = document.getElementById("featureTable");
+  const features = data.feature_values;
+  const featRows = Object.entries(features).map(([name, val]) => `
+    <div class="feat-row">
+      <span class="feat-name">${name}</span>
+      <span class="feat-val font-mono">${val.toFixed(4)}</span>
+    </div>
+  `).join("");
+  featureTable.innerHTML = `<div class="feat-grid">${featRows}</div>`;
+
+  // ── Decision Rules ──
+  const rulesContainer = document.getElementById("decisionRules");
+  const rules = data.decision_rules;
+  rulesContainer.innerHTML = rules.map((rule, i) => {
+    const isFinal = rule.startsWith("→");
+    const indent  = "  ".repeat(Math.min(i, 8));
+    return `
+      <div class="rule-line ${isFinal ? 'rule-final' : 'rule-step'}" style="padding-left:${i * 16}px">
+        <span class="rule-num">${isFinal ? "✓" : (i + 1)}</span>
+        <span class="rule-text">${rule}</span>
+      </div>
+    `;
+  }).join("");
+}
+</script>
+
+</body>
+</html>

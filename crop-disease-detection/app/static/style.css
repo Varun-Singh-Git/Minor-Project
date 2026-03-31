@@ -1,0 +1,386 @@
+/* ═══════════════════════════════════════════════════
+   CropGuard AI — Custom Stylesheet
+   Crop Disease Detection System
+   IILM University · 2025–26
+═══════════════════════════════════════════════════ */
+
+/* ── Fonts & Base ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Inter", -apple-system, sans-serif;
+  background: #0a0f0a;
+  color: #e8f5e9;
+  min-height: 100vh;
+}
+
+/* ── Navbar ── */
+.navbar {
+  background: rgba(10, 20, 10, 0.95);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.15);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-icon { font-size: 1.8rem; }
+.navbar-brand { font-size: 1.1rem; font-weight: 700; color: #22c55e !important; letter-spacing: -0.3px; }
+.navbar-sub { font-size: 0.7rem; color: #6b7280; letter-spacing: 0.5px; text-transform: uppercase; }
+
+.badge-accuracy {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Hero Section ── */
+.hero-section {
+  padding: 70px 0 60px;
+  background: radial-gradient(ellipse at 20% 50%, rgba(34, 197, 94, 0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 20%, rgba(16, 185, 129, 0.04) 0%, transparent 50%);
+}
+
+.hero-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #f0fdf4;
+}
+
+.text-accent { color: #22c55e; }
+
+.hero-subtitle {
+  font-size: 1.05rem;
+  color: #9ca3af;
+  line-height: 1.7;
+  margin-top: 1rem;
+  max-width: 480px;
+}
+
+.hero-stats { margin-top: 1.5rem; }
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #22c55e;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+}
+
+/* ── Upload Card ── */
+.upload-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}
+
+.upload-zone {
+  border: 2px dashed rgba(34, 197, 94, 0.25);
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: rgba(34, 197, 94, 0.02);
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: #22c55e;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.upload-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #d1fae5;
+  margin-bottom: 4px;
+}
+
+.upload-sub { font-size: 0.8rem; color: #6b7280; }
+
+.preview-img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.btn-clear {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.btn-clear:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+.btn-analyse {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 12px 0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.25);
+}
+.btn-analyse:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(34, 197, 94, 0.4);
+  color: #fff;
+}
+.btn-analyse:disabled {
+  background: #374151;
+  box-shadow: none;
+  color: #6b7280;
+}
+
+/* ── Loading Spinner ── */
+.spinner-leaf {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(34, 197, 94, 0.2);
+  border-top-color: #22c55e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Results Section ── */
+.results-section {
+  padding: 60px 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.result-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f0fdf4;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(34, 197, 94, 0.12);
+  border-radius: 14px;
+  padding: 24px;
+  backdrop-filter: blur(5px);
+}
+
+.card-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #22c55e;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/* Prediction Card */
+.prediction-card { border-color: rgba(34, 197, 94, 0.25); }
+
+.disease-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #86efac;
+}
+
+.disease-badge span:first-child { font-size: 2rem; }
+
+/* Confidence Meter */
+.confidence-label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 6px; }
+.confidence-label strong { color: #d1fae5; }
+
+.meter-track {
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease, background 0.5s ease;
+  width: 0%;
+}
+
+.divider { border-color: rgba(255,255,255,0.06); margin: 16px 0; }
+
+/* Advice Box */
+.advice-box { font-size: 0.85rem; }
+.advice-severity { font-size: 0.72rem; margin-bottom: 8px; }
+.advice-desc { color: #9ca3af; margin-bottom: 8px; line-height: 1.5; }
+.advice-action { color: #86efac; line-height: 1.5; }
+
+/* Probability Chart */
+.prob-label { font-size: 0.8rem; color: #d1d5db; }
+.prob-pct   { font-size: 0.8rem; color: #9ca3af; }
+
+.prob-track {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.prob-fill {
+  height: 100%;
+  background: rgba(34, 197, 94, 0.4);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+.prob-fill-active { background: #22c55e; }
+
+/* Feature Table */
+.feat-grid { display: flex; flex-direction: column; gap: 4px; }
+
+.feat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.feat-name { font-size: 0.77rem; color: #9ca3af; }
+.feat-val  {
+  font-size: 0.77rem;
+  color: #86efac;
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* Decision Rules */
+.rules-card {
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.rules-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.82rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.rule-line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.rule-num {
+  min-width: 20px;
+  color: #6b7280;
+  font-size: 0.72rem;
+}
+
+.rule-step .rule-text { color: #c4b5fd; }
+.rule-final .rule-text {
+  color: #22c55e;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+.rule-final .rule-num { color: #22c55e; }
+
+/* ── How It Works ── */
+.how-section {
+  padding: 70px 0;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f0fdf4;
+  letter-spacing: -0.5px;
+}
+
+.step-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(34, 197, 94, 0.1);
+  border-radius: 14px;
+  padding: 28px;
+  height: 100%;
+  transition: border-color 0.25s;
+}
+
+.step-card:hover { border-color: rgba(34, 197, 94, 0.3); }
+
+.step-num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: rgba(34, 197, 94, 0.2);
+  font-family: "JetBrains Mono", monospace;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.step-card h5 { color: #d1fae5; font-weight: 600; margin-bottom: 8px; font-size: 1rem; }
+.step-card p  { color: #6b7280; font-size: 0.88rem; line-height: 1.6; }
+
+/* ── Footer ── */
+.footer {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.3);
+}
+
+/* ── Utilities ── */
+.fw-700 { font-weight: 700; }
+.font-mono { font-family: "JetBrains Mono", monospace; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hero-title { font-size: 1.8rem; }
+  .hero-stats { flex-wrap: wrap; gap: 2rem; }
+  .navbar { flex-wrap: wrap; gap: 8px; }
+}
